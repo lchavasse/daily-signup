@@ -100,6 +100,7 @@ const EmailSignup = () => {
         ) : (
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2 text-gray-900">Thanks for signing up!</h2>
+            <p className="text-gray-600 mb-8">If you want hear more, please follow us on instagram or get in touch at <a href="mailto:daily@nile-street.com" className="text-blue-500 hover:underline">daily@nile-street.com</a></p>
           </div>
         )}
         </div>
