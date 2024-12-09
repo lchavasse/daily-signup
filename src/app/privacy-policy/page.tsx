@@ -1,7 +1,3 @@
-'use client';
-
-import Link from 'next/link';
-
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
@@ -120,6 +116,10 @@ export default function PrivacyPolicy() {
         <p className="mb-6">
           <strong>Email:</strong> <a href="mailto:daily@nile-street.com" className="text-blue-500">daily@nile-street.com</a>
           <br />
+        </p>
+        <h3 className="text-2xl font-semibold mb-4 text-gray-900">8.1 Account Deletion</h3>
+        <p id="account-deletion" className="mb-6">
+          Should you wish to delete any individual diary entry, simply overwriting it with a blank entry will remove it from our database. If you wish to delete your entire account, please erase your entries from the settings of the app and contact us to confirm deletion of your user from the system.
         </p>
 
         <h2 className="text-2xl font-semibold mb-4 text-gray-900">9. Changes to This Privacy Policy</h2>
