@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Link from "next/link";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "daily. | journal with voice and ai",
+  title: "daily. | journal + voice and ai",
   description: "the future of journaling with voice and ai",
 };
 
@@ -28,7 +29,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <main>{children}</main>
+        <footer className="fixed bottom-0 w-full py-4 text-center">
+          <nav className="space-x-4 text-sm text-gray-600">
+            <Link href="/" className="hover:text-gray-900">Home</Link>
+            <Link href="/privacy-policy" className="hover:text-gray-900">Privacy Policy</Link>
+          </nav>
+        </footer>
       </body>
     </html>
   );
