@@ -16,10 +16,17 @@ export default function PrivacyPolicy() {
         </p>
 
         <h2 className="text-2xl font-semibold mb-4 text-gray-900">1. Data We Collect</h2>
+
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-900">a) Email Address</h3>
           <p>Purpose: Used for account authentication and communication related to your account.</p>
-          <p>Storage: Securely stored and used solely for login and communication purposes.</p>
+          <p>Storage: Securely stored and used solely for login and communication purposes. This is connected to a unique user ID in our database.</p>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-medium text-gray-900">b) Phone Number</h3>
+          <p>Purpose: Optionally given to enable phone calls with the voice agent.</p>
+          <p>Storage: Associated with your user ID in order to authenticate you when you call.</p>
         </div>
 
         <div className="mb-6">
@@ -28,12 +35,13 @@ export default function PrivacyPolicy() {
             cannot be accessed without the device or key.</p>
           <p><strong>Optional AI Services:</strong> If you opt to use AI features, your journal entries are decrypted and sent to
             our partners for analysis. These partners do not retain your data after processing.</p>
+            <p><strong>Encryption Key:</strong> Your encryption key is stored locally on device. We reccomend you save it somewhere else. If you use the voice agent to access your journal entries, the key is securely transferred to our server for the duration of the call.</p>
         </div>
 
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-900">c) Voice Data</h3>
-          <p>Purpose: Voice data is sent to our partners at OpenAI for transcription and processing when you use voice-to-text
-            features.</p>
+          <p>Purpose: Voice data is sent to our partners at OpenAI and/or Deepgram for transcription and processing when you use speech-to-text
+            features. In app, and in the voice agent. These features are optional.</p>
           <p>Retention: Voice data is not stored or saved by us or our partners after processing.</p>
         </div>
 
