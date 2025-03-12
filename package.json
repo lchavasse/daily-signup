@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.46.1",
+    "libphonenumber-js": "^1.12.5",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-phone-input-2": "^2.15.1",
     "supabase": "^1.219.2"
   },
   "devDependencies": {

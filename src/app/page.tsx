@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js'
 import { Afacad } from 'next/font/google';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import './phone-input.css';
 
 const afacad = Afacad({
   subsets: ['latin'],
@@ -11,6 +15,44 @@ const afacad = Afacad({
   variable: '--font-afacad',
 });
 
+// Custom styles for the phone input
+const phoneInputCustomStyles = {
+  containerStyle: {
+    width: '100%',
+    marginBottom: '1rem',
+  },
+  inputStyle: {
+    width: '100%',
+    height: '42px',
+    fontSize: '16px',
+    paddingLeft: '48px',
+    borderRadius: '6px',
+    border: '1px solid #E5E7EB',
+    backgroundColor: 'white',
+    color: '#111827',
+    '&:focus': {
+      border: '1px solid #6B7280',
+      boxShadow: '0 0 0 2px rgba(107, 114, 128, 0.1)',
+    },
+  },
+  buttonStyle: {
+    border: '1px solid #E5E7EB',
+    borderRadius: '6px 0 0 6px',
+    backgroundColor: 'white',
+    '&:focus': {
+      border: '1px solid #6B7280',
+    },
+  },
+  dropdownStyle: {
+    width: '300px',
+    maxHeight: '300px',
+    borderRadius: '6px',
+    border: '1px solid #E5E7EB',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    marginTop: '4px',
+  }
+};
+
 const supabaseUrl = 'https://fwcuguulstooyzkkxtvg.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3Y3VndXVsc3Rvb3l6a2t4dHZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU0MzcyNTEsImV4cCI6MjA0MTAxMzI1MX0.DukHnchH5-5qs_F6c4jJtTWTw3CIaNHx2sWenhUnGFw';
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -18,9 +60,13 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const EmailSignup = () => {
   const [displayText, setDisplayText] = useState('');
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
+  const [isCallMeSubmitting, setIsCallMeSubmitting] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
+  const [phoneMessage, setPhoneMessage] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [callMeSubmitted, setCallMeSubmitted] = useState(false);
 
   // Typing animation effect
   useEffect(() => {
@@ -39,10 +85,10 @@ const EmailSignup = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setMessage('');
+    setIsEmailSubmitting(true);
+    setEmailMessage('');
 
     try {
       const { error } = await supabase
@@ -50,13 +96,57 @@ const EmailSignup = () => {
         .insert([{ email, created_at: new Date().toISOString() }]);
       
       if (error) throw error;
-      setSubmitted(true);
+      setEmailSubmitted(true);
       setEmail('');
     } catch (error) {
       console.error('Error:', error);
-      setMessage('Something went wrong. Please try again.');
+      setEmailMessage('Something went wrong. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setIsEmailSubmitting(false);
+    }
+  };
+
+  const handlePhoneSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsCallMeSubmitting(true);
+    setPhoneMessage('');
+
+    try {
+      // Parse and validate the phone number
+      const phoneNumber = parsePhoneNumberFromString("+" + phone);
+      if (!phoneNumber || !phoneNumber.isValid()) {
+        throw new Error('Please enter a valid phone number with country code');
+      }
+
+      // Make the POST request to the server
+      const futureDate = new Date(Date.now() + 30000); // 30 seconds in the future
+      const formattedDate = futureDate.toISOString().split('.')[0] + 'Z'; // Remove milliseconds and ensure Z suffix
+
+      const response = await fetch('https://daily-dev-server.onrender.com/reminders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone_number: phoneNumber.format('E.164'), // Format as E.164
+          date: formattedDate,
+          message: "Hey, its daily here. How's it going?",
+          method: "call"
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to submit phone number');
+      }
+
+      setCallMeSubmitted(true);
+      setPhone('');
+    } catch (error) {
+      console.error('Error:', error);
+      setPhoneMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsCallMeSubmitting(false);
     }
   };
 
@@ -132,42 +222,92 @@ const EmailSignup = () => {
             </a>
           </div>
         </div>
+
+        {/* Call me form */}
+        <div className="w-[90%] max-w-md p-8 bg-white rounded-lg shadow-lg">
+          {!callMeSubmitted ? (
+            <>
+              <form onSubmit={handlePhoneSubmit} className="space-y-4">
+                <div className="relative">
+                  <PhoneInput
+                    country={'gb'}
+                    value={phone}
+                    onChange={setPhone}
+                    containerStyle={phoneInputCustomStyles.containerStyle}
+                    inputStyle={phoneInputCustomStyles.inputStyle}
+                    buttonStyle={phoneInputCustomStyles.buttonStyle}
+                    dropdownStyle={phoneInputCustomStyles.dropdownStyle}
+                    enableSearch={true}
+                    searchPlaceholder="Search countries..."
+                    searchStyle={{
+                      width: '100%',
+                      height: '36px',
+                      padding: '8px',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '4px',
+                      marginBottom: '8px',
+                    }}
+                    countryCodeEditable={false}
+                  />
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={isCallMeSubmitting}
+                  className="w-full px-4 py-2 text-white bg-gray-700 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition-colors duration-200"
+                >
+                  {isCallMeSubmitting ? 'Calling...' : 'Get daily to call you now!'}
+                </button>
+                
+                {phoneMessage && (
+                  <p className="text-sm text-red-600 mt-2">
+                    {phoneMessage}
+                  </p>
+                )}
+              </form>
+            </>
+          ) : (
+            <div className="text-center">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">daily will call you in a moment!</h2>
+            </div>
+          )}
+        </div>
         
         {/* Email signup form */}
-        <div className="w-[90%] max-w-md p-8 bg-white rounded-lg shadow-lg">
-        {!submitted ? (
-          <>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:border-gray-500 focus:outline-none text-gray-900"
-            />
-            
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="w-full px-4 py-2 text-white bg-gray-700 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {isSubmitting ? 'Signing up...' : 'Get Early Access to Version 1'}
-            </button>
-            
-            {message && (
-              <p className="text-sm text-gray-600 mt-2">
-                {message}
-              </p>
-            )}
-          </form>
-          </>
-        ) : (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2 text-gray-900">Thanks for signing up!</h2>
-            <p className="text-gray-600 mb-8">If you want hear more, please follow us on instagram or get in touch at <a href="mailto:daily@nile-street.com" className="text-blue-500 hover:underline">daily@nile-street.com</a></p>
-          </div>
-        )}
+        <div className="w-[90%] max-w-md p-8 bg-white rounded-lg shadow-lg mt-8">
+          {!emailSubmitted ? (
+            <>
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:border-gray-500 focus:outline-none text-gray-900"
+                />
+                
+                <button 
+                  type="submit" 
+                  disabled={isEmailSubmitting}
+                  className="w-full px-4 py-2 text-white bg-gray-700 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  {isEmailSubmitting ? 'Signing up...' : 'Get Early Access to Version 1'}
+                </button>
+                
+                {emailMessage && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    {emailMessage}
+                  </p>
+                )}
+              </form>
+            </>
+          ) : (
+            <div className="text-center">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Thanks for signing up!</h2>
+              <p className="text-gray-600 mb-8">If you want hear more, please follow us on instagram or get in touch at <a href="mailto:daily@nile-street.com" className="text-blue-500 hover:underline">daily@nile-street.com</a></p>
+            </div>
+          )}
         </div>
       </div>
     </div>
