@@ -67,6 +67,7 @@ const EmailSignup = () => {
   const [phoneMessage, setPhoneMessage] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [callMeSubmitted, setCallMeSubmitted] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   // Typing animation effect
   useEffect(() => {
@@ -112,6 +113,11 @@ const EmailSignup = () => {
     setPhoneMessage('');
 
     try {
+      // Check if consent is given
+      if (!consentChecked) {
+        throw new Error('Please consent to being contacted by daily on this number');
+      }
+
       // Parse and validate the phone number
       const phoneNumber = parsePhoneNumberFromString("+" + phone);
       if (!phoneNumber || !phoneNumber.isValid()) {
@@ -249,6 +255,22 @@ const EmailSignup = () => {
                     }}
                     countryCodeEditable={false}
                   />
+                </div>
+                
+                <div className="flex items-start mt-2 mb-4">
+                  <div className="flex items-center h-5 ml-2">
+                    <input
+                      id="consent"
+                      type="checkbox"
+                      checked={consentChecked}
+                      onChange={(e) => setConsentChecked(e.target.checked)}
+                      required
+                      className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300"
+                    />
+                  </div>
+                  <label htmlFor="consent" className="ml-2 text-sm font-medium text-gray-700">
+                    I consent to being contacted by daily on this number
+                  </label>
                 </div>
                 
                 <button 
