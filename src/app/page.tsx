@@ -136,7 +136,6 @@ const EmailSignup = () => {
         body: JSON.stringify({
           phone_number: phoneNumber.format('E.164'), // Format as E.164
           date: formattedDate,
-          message: "Hey, its daily here. How's it going?",
           method: "call"
         }),
       });
